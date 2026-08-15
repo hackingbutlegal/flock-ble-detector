@@ -137,11 +137,12 @@ This tool builds on prior research into identifying and assessing Flock Safety i
   Raven GATT service/characteristic map (`datasets/raven_configurations.json`) that drives this
   tool's read-only Raven telemetry decoder. flock-you is a promiscuous-mode 2.4 GHz WiFi detector for
   Flock infrastructure; this project reuses its BLE Raven map only.
-- **FlipDeFlock** — counter-surveillance research corroborating the Flock external-battery BLE
-  identification signals and the precision-over-recall confidence model.
-- **ryanohoro, "Spotting Flock Safety's Falcon Cameras"** — primary source for the XUNTONG `0x09C8`
-  manufacturer id, the `Penguin-` / `FS Ext Battery` GAP names, and the ASCII serial in the
-  advertisement.
+- **[FlipDeFlock](https://github.com/ReconGrunt/FlipDeFlock)** — counter-surveillance research
+  corroborating the Flock external-battery BLE identification signals and the precision-over-recall
+  confidence model.
+- **ryanohoro, "[Spotting Flock Safety's Falcon Cameras](https://www.ryanohoro.com/post/spotting-flock-safety-s-falcon-cameras)"**
+  — primary source for the XUNTONG `0x09C8` manufacturer id, the `Penguin-` / `FS Ext Battery` GAP
+  names, and the ASCII serial in the advertisement.
 - **Anonymous Researcher** — BLE/DFU proof-of-concept work and vulnerability findings (nRF52 Secure
   DFU pairing, firmware-signature enforcement, unpaired privileged-write, and credential handling)
   that informed the design of this tool's verification checks (F1 / CH-1 / F4 / F5 / F2).
