@@ -1,0 +1,42 @@
+{
+  "name": "flock-ble-detector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#ble/*": "./src/ble/*",
+    "#checks/*": "./src/checks/*",
+    "#net/*": "./src/net/*",
+    "#report/*": "./src/report/*",
+    "#run/*": "./src/run/*",
+    "#ui/*": "./src/ui/*"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "pnpm run build:client && pnpm run build:server",
+    "build:client": "esbuild src/main.ts --bundle --format=esm --target=es2022 --minify --sourcemap --outfile=public/assets/main.js",
+    "build:server": "esbuild server/index.ts --bundle --format=esm --platform=node --target=node22 --outfile=server/dist/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "typecheck:server": "tsc -p tsconfig.server.json",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run typecheck:server && pnpm run test"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "@types/web-bluetooth": "0.0.21",
+    "@vitest/coverage-v8": "4.1.10",
+    "esbuild": "0.28.2",
+    "oxfmt": "0.61.0",
+    "oxlint": "1.76.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "packageManager": "pnpm@11.20.0"
+}

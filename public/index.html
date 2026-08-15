@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PMIC BLE Verifier</title>
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --surface: #ffffff;
+        --ink: #101828;
+        --ink-soft: #475467;
+        --border: #d0d5dd;
+        --accent: #3538cd;
+        --accent-ink: #ffffff;
+        --confirmed: #b42318;
+        --refuted: #067647;
+        --inconclusive: #475467;
+        --running: #b54708;
+        --radius: 12px;
+        --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        color: var(--ink);
+        background: var(--bg);
+        margin: 0 auto;
+        padding: 1rem;
+        max-width: 44rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+        letter-spacing: -0.01em;
+        margin: 0 0 0.25rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        letter-spacing: -0.01em;
+        margin: 1.75rem 0 0.5rem;
+      }
+      h3 {
+        font-size: 1rem;
+        margin: 0 0 0.35rem;
+      }
+      .lede {
+        color: var(--ink-soft);
+        margin: 0 0 1rem;
+      }
+      button {
+        font: inherit;
+        font-weight: 600;
+        min-height: 44px;
+        padding: 0.6rem 1.1rem;
+        margin: 0.25rem 0;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--accent-ink);
+        cursor: pointer;
+      }
+      button:hover {
+        filter: brightness(1.05);
+      }
+      button:focus-visible {
+        outline: 3px solid rgba(53, 56, 205, 0.4);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      button.secondary {
+        background: var(--surface);
+        color: var(--accent);
+      }
+      section {
+        margin-top: 1rem;
+      }
+      fieldset {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin: 0 0 1rem;
+      }
+      legend {
+        font-weight: 600;
+        padding: 0 0.4rem;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1rem;
+        margin: 0.75rem 0;
+      }
+      .card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+      label {
+        display: block;
+        margin: 0.4rem 0;
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+      }
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        margin-top: 0.2rem;
+        padding: 0.5rem;
+        font:
+          0.85rem ui-monospace,
+          "SF Mono",
+          monospace;
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0.5rem 0;
+      }
+      .checkbox-row input {
+        width: auto;
+        min-width: 20px;
+        min-height: 20px;
+      }
+      .session-field {
+        color: var(--ink-soft);
+      }
+      .hint {
+        color: var(--ink-soft);
+        font-size: 0.82rem;
+        margin: 0.1rem 0 0.5rem;
+      }
+      #session-info {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+      }
+      .status-chip {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--running);
+      }
+      .status-chip.running::before {
+        content: "● ";
+      }
+      .summary-strip {
+        font-weight: 600;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+      }
+      .result-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 1rem;
+        margin: 0.75rem 0;
+      }
+      .result-card p {
+        margin: 0.35rem 0;
+        color: var(--ink-soft);
+      }
+      .result-card strong {
+        color: var(--ink);
+      }
+      .result-card ul {
+        margin: 0.35rem 0;
+        padding-left: 1.25rem;
+        font:
+          0.85rem ui-monospace,
+          "SF Mono",
+          monospace;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #fff;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+      }
+      .badge.confirmed {
+        background: var(--confirmed);
+      }
+      .badge.refuted {
+        background: var(--refuted);
+      }
+      .badge.inconclusive {
+        background: var(--inconclusive);
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .gatt-row {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+      }
+      .gatt-row p {
+        margin: 0.2rem 0;
+        color: var(--ink-soft);
+        font-size: 0.85rem;
+        word-break: break-all;
+      }
+      .gatt-row strong {
+        color: var(--ink);
+      }
+      .gatt-row button {
+        font-size: 0.78rem;
+        min-height: 34px;
+        padding: 0.3rem 0.6rem;
+      }
+      #device-info p {
+        margin: 0.2rem 0;
+        color: var(--ink-soft);
+      }
+      #device-info strong {
+        color: var(--ink);
+      }
+      pre {
+        background: #0c111d;
+        color: #e4e7ec;
+        padding: 0.75rem;
+        border-radius: var(--radius);
+        overflow: auto;
+        font-size: 0.8rem;
+        max-height: 16rem;
+      }
+      select {
+        width: 100%;
+        margin-top: 0.2rem;
+        padding: 0.5rem;
+        font: inherit;
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+      .survey-count {
+        font-weight: 600;
+        color: var(--ink-soft);
+        margin: 0.75rem 0 0.25rem;
+      }
+      .survey-row {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0.6rem 0.85rem;
+        margin: 0.5rem 0;
+      }
+      .survey-row.likely-target {
+        border-left-color: var(--accent);
+      }
+      .survey-row.confirmed-target {
+        border-left-color: var(--confirmed);
+      }
+      .survey-row p {
+        margin: 0.15rem 0;
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+      }
+      .survey-row strong {
+        color: var(--ink);
+      }
+      .survey-row .signals {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.3rem;
+      }
+      .survey-row .badge {
+        background: var(--accent);
+        font-size: 0.7rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PMIC BLE Verifier</h1>
+    <p class="lede"><strong>Authorized testing only.</strong> Android Chrome, HTTPS.</p>
+
+    <section id="survey-section">
+      <h2>Survey nearby devices</h2>
+      <p class="hint">
+        Profiles BLE advertisements in range and highlights likely solar-camera PMICs (Nordic DFU
+        <code>0xFE59</code> / Nordic company <code>0x0059</code>), ranked by signal strength.
+        Identification only &mdash; then connect below. Nothing here is logged.
+      </p>
+      <button id="survey-btn" class="secondary">Survey nearby devices</button>
+      <p class="hint" id="survey-help" hidden>
+        Survey needs Chrome's experimental Web Platform features &mdash; enable
+        <code>chrome://flags/#enable-experimental-web-platform-features</code> and reload.
+        Meanwhile, use "Likely targets only" in the device chooser.
+      </p>
+      <p class="hint" id="survey-status"></p>
+      <div id="survey-results"></div>
+    </section>
+
+    <label for="cfg-name-filter">Device name filter (optional)</label>
+    <input type="text" id="cfg-name-filter" placeholder="e.g. PMIC" />
+    <p class="hint">
+      When set, the device chooser only lists devices whose name starts with this text. Leave blank
+      to list every nearby device. The MAC is not visible in-app; identify the unit by the
+      <code>28:DE:65:</code> prefix in an OS scanner or nRF Connect.
+    </p>
+    <label for="cfg-filter-mode">Device chooser filter</label>
+    <select id="cfg-filter-mode">
+      <option value="likely">Likely targets only</option>
+      <option value="all">All devices</option>
+    </select>
+    <p class="hint">
+      "Likely targets only" narrows the chooser to devices advertising Nordic DFU
+      <code>0xFE59</code>, Nordic company <code>0x0059</code>, or your name filter. A device in
+      application mode may not advertise these &mdash; switch to "All devices" if the unit is
+      missing.
+    </p>
+    <button id="connect">1 &middot; Connect device</button>
+
+    <section id="device-section" hidden>
+      <h2>Device</h2>
+      <div id="device-info" class="card"></div>
+      <h3>GATT table</h3>
+      <p class="hint">
+        Only granted services are enumerated. Use a button below to assign a UUID to a config field.
+      </p>
+      <div id="gatt-table"></div>
+    </section>
+
+    <section id="config" hidden>
+      <h2>2 &middot; Configure characteristics</h2>
+      <p class="hint">
+        Nordic DFU UUIDs are prefilled; enter the vendor UUIDs for this PMIC below.
+      </p>
+
+      <fieldset>
+        <legend>DFU (Nordic defaults — edit for legacy DFU)</legend>
+        <label>DFU service UUID <input type="text" id="cfg-dfu-service" /></label>
+        <label
+          >Control point characteristic UUID <input type="text" id="cfg-control-point"
+        /></label>
+        <label>Packet characteristic UUID <input type="text" id="cfg-packet" /></label>
+        <label>Buttonless characteristic UUID <input type="text" id="cfg-buttonless" /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Vendor (tester-supplied)</legend>
+        <label>Vendor service UUID <input type="text" id="cfg-vendor-service" /></label>
+        <label
+          >Charge / privileged characteristic UUID <input type="text" id="cfg-charge-char"
+        /></label>
+        <label>Passphrase characteristic UUID <input type="text" id="cfg-passphrase-char" /></label>
+        <label>Log characteristic UUID <input type="text" id="cfg-log-char" /></label>
+        <label>Benign marker / passphrase value <input type="text" id="cfg-marker" /></label>
+      </fieldset>
+
+      <button id="reconnect">Save config &amp; grant vendor access</button>
+      <p class="hint">
+        Web Bluetooth only allows GATT access to services requested at connect time — saving reopens
+        the device chooser to grant the vendor service.
+      </p>
+    </section>
+
+    <section id="session-info-section">
+      <h2>Session details</h2>
+      <p class="hint">
+        Optional — labels this session's report and log. Access is limited to authorized testers, so
+        no per-run confirmation is required.
+      </p>
+      <div id="session-info"></div>
+    </section>
+
+    <section id="checks" hidden>
+      <h2>3 &middot; Run checks</h2>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Auto-run all checks</h3>
+          <span class="status-chip" id="status-all"></span>
+        </div>
+        <p class="hint">
+          Runs F1 &rarr; CH-1 &rarr; F4 &rarr; F5 &rarr; F2 in order — a safe set. CH-1's
+          device-reboot ENTER and F2 flashing never run automatically.
+        </p>
+        <button id="run-all">Run all checks</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>F1 &middot; BLE pairing accepts Just Works</h3>
+          <span class="status-chip" id="status-f1"></span>
+        </div>
+        <p class="hint">Reads the charge/privileged characteristic as the protected probe.</p>
+        <label for="f1-prompt-type">What did the pairing prompt look like?</label>
+        <select id="f1-prompt-type">
+          <option value="none">No prompt appeared</option>
+          <option value="just-works">A plain "Pair?" confirmation &mdash; no code</option>
+          <option value="authenticated">
+            A 6-digit code to compare, or a passkey/PIN to enter
+          </option>
+          <option value="failed">The read failed / I cancelled</option>
+        </select>
+        <p class="hint">
+          A plain "Pair?" = Just Works (unauthenticated). A 6-digit compare or passkey =
+          authenticated. The browser can't read this itself, so your observation decides the
+          verdict.
+        </p>
+        <button id="run-f1">Run F1</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>CH-1 &middot; DFU reachable from an unauthenticated bond</h3>
+          <span class="status-chip" id="status-ch1"></span>
+        </div>
+        <button id="run-ch1">Run CH-1</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>F4 &middot; Unpaired privileged-write gate</h3>
+          <span class="status-chip" id="status-f4"></span>
+        </div>
+        <p class="hint">Active/write test — writes to the device (safety-interlocked).</p>
+        <button id="run-f4">Run F4</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>F5 &middot; Plaintext logging of submitted passphrases</h3>
+          <span class="status-chip" id="status-f5"></span>
+        </div>
+        <button id="run-f5">Run F5</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>F2 &middot; DFU image signature enforcement</h3>
+          <span class="status-chip" id="status-f2"></span>
+        </div>
+        <p class="hint">Active/write test — writes to the device (safety-interlocked).</p>
+        <label
+          >manifest.json <input type="file" id="f2-manifest" accept="application/json"
+        /></label>
+        <label>Init packet (.dat) <input type="file" id="f2-dat" /></label>
+        <label>Firmware image (.bin) <input type="file" id="f2-bin" /></label>
+        <div class="checkbox-row">
+          <input type="checkbox" id="f2-commit" />
+          <label for="f2-commit"
+            >Commit benign image (default OFF — abort-safe prove-acceptance)</label
+          >
+        </div>
+        <button id="run-f2">Run F2</button>
+      </div>
+    </section>
+
+    <h2>Results</h2>
+    <div id="results"></div>
+    <div class="actions">
+      <button id="export" class="secondary" hidden>Copy Markdown</button>
+      <button id="export-json" class="secondary" hidden>Copy JSON</button>
+      <button id="download-md" hidden>Download .md</button>
+      <button id="download-json" hidden>Download .json</button>
+    </div>
+
+    <h2>Live GATT log</h2>
+    <pre id="log"></pre>
+
+    <script type="module" src="/assets/main.js"></script>
+  </body>
+</html>

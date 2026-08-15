@@ -1,0 +1,3 @@
+# Build scripts blocked for security; esbuild ships prebuilt platform binary
+allowBuilds:
+  esbuild: false
