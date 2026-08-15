@@ -39,3 +39,7 @@ was copied from these sources:
   precision-over-recall confidence model.
 - **ryanohoro, "Spotting Flock Safety's Falcon Cameras"** — the XUNTONG `0x09C8` manufacturer id, the
   `Penguin-` / `FS Ext Battery` GAP names, and the ASCII serial in the advertisement.
+- **Anonymous Researcher** — a private BLE/DFU proof-of-concept and vulnerability findings that
+  informed the verification-check methodology (pairing authentication, DFU signature enforcement,
+  privileged-write gating, credential handling). No code or exploit detail from this source is
+  included in this repository.

@@ -131,7 +131,7 @@ enforced), or `inconclusive` (missing input or ambiguous response — the `limit
 
 ## Acknowledgements
 
-This tool builds on prior public research into identifying Flock Safety infrastructure:
+This tool builds on prior research into identifying and assessing Flock Safety infrastructure:
 
 - **[colonelpanichacks/flock-you](https://github.com/colonelpanichacks/flock-you)** (MIT) — the
   Raven GATT service/characteristic map (`datasets/raven_configurations.json`) that drives this
@@ -142,6 +142,9 @@ This tool builds on prior public research into identifying Flock Safety infrastr
 - **ryanohoro, "Spotting Flock Safety's Falcon Cameras"** — primary source for the XUNTONG `0x09C8`
   manufacturer id, the `Penguin-` / `FS Ext Battery` GAP names, and the ASCII serial in the
   advertisement.
+- **Anonymous Researcher** — BLE/DFU proof-of-concept work and vulnerability findings (nRF52 Secure
+  DFU pairing, firmware-signature enforcement, unpaired privileged-write, and credential handling)
+  that informed the design of this tool's verification checks (F1 / CH-1 / F4 / F5 / F2).
 
 Third-party license notices are in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
 
